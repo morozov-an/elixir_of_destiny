@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Эликсир Судьбы</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e6e6e6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(30, 30, 46, 0.9);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid #4a4a6d;
+        }
+
+        h1 {
+            text-align: center;
+            color: #ffd700;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #a0a0c0;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .substance-card {
+            background: linear-gradient(145deg, #2d2d44, #252536);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            border: 2px solid #4a4a6d;
+            transition: all 0.3s ease;
+        }
+
+        .substance-card:hover {
+            transform: translateY(-5px);
+            border-color: #ffd700;
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.2);
+        }
+
+        .substance-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .counter {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .counter-btn {
+            background: #4a4a6d;
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2em;
+            transition: all 0.2s ease;
+        }
+
+        .counter-btn:hover {
+            background: #ffd700;
+            color: #1a1a2e;
+        }
+
+        .counter-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .wheel-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 30px auto;
+        }
+
+        .wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(
+                from 0deg,
+                #ff6b6b 0deg 60deg,
+                #4ecdc4 60deg 120deg,
+                #45b7d1 120deg 180deg,
+                #96ceb4 180deg 240deg,
+                #ffeaa7 240deg 300deg,
+                #dda0dd 300deg 360deg
+            );
+            position: relative;
+            transition: transform 3s cubic-bezier(0.2, 0.8, 0.3, 1);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+
+        .wheel.spinning {
+            animation: spin 3s cubic-bezier(0.2, 0.8, 0.3, 1);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(1440deg); }
+        }
+
+        .pointer {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 40px;
+            background: #ffd700;
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            z-index: 10;
+        }
+
+        .controls {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .spin-btn {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .spin-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.6);
+        }
+
+        .spin-btn:disabled {
+            background: #4a4a6d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .result {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            border: 1px solid #4a4a6d;
+        }
+
+        .probability {
+            font-size: 3em;
+            font-weight: bold;
+            color: #ffd700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            margin: 10px 0;
+        }
+
+        .risk-level {
+            font-size: 1.2em;
+            color: #a0a0c0;
+        }
+
+        .modifiers {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #a0a0c0;
+        }
+
+        .modifier-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .positive { color: #96ceb4; }
+        .negative { color: #ff6b6b; }
+        .warning { color: #ffeaa7; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚗️ Эликсир Судьбы</h1>
+        <p class="subtitle">Смешай зелья и узнай свою судьбу!</p>
+        
+        <div class="game-grid">
+            <!-- Кофе -->
+            <div class="substance-card">
+                <div class="substance-icon">☕</div>
+                <h3>Кофе</h3>
+                <div class="counter">
+                    <button class="counter-btn" onclick="changeValue('coffee', -1)">-</button>
+                    <span class="counter-value" id="coffee-value">0</span>
+                    <button class="counter-btn" onclick="changeValue('coffee', 1)">+</button>
+                </div>
+                <small>1-4 чашки: защита<br>5+: риск</small>
+            </div>
+
+            <!-- Вино -->
+            <div class="substance-card">
+                <div class="substance-icon">🍷</div>
+                <h3>Вино</h3>
+                <div class="counter">
+                    <button class="counter-btn" onclick="changeValue('wine', -1)">-</button>
+                    <span class="counter-value" id="wine-value">0</span>
+                    <button class="counter-btn" onclick="changeValue('wine', 1)">+</button>
+                </div>
+                <small>1 бокал: нейтр.<br>2+: сила</small>
+            </div>
+
+            <!-- Пиво -->
+            <div class="substance-card">
+                <div class="substance-icon">🍺</div>
+                <h3>Пиво</h3>
+                <div class="counter">
+                    <button class="counter-btn" onclick="changeValue('beer', -1)">-</button>
+                    <span class="counter-value" id="beer-value">0</span>
+                    <button class="counter-btn" onclick="changeValue('beer', 1)">+</button>
+                </div>
+                <small>1-2 кружки: нейтр.<br>3+: удача</small>
+            </div>
+
+            <!-- Сон -->
+            <div class="substance-card">
+                <div class="substance-icon">💤</div>
+                <h3>Сон (часы)</h3>
+                <div class="counter">
+                    <button class="counter-btn" onclick="changeValue('sleep', -1)">-</button>
+                    <span class="counter-value" id="sleep-value">8</span>
+                    <button class="counter-btn" onclick="changeValue('sleep', 1)">+</button>
+                </div>
+                <small>Меньше 6: риск<br>12+: пересып</small>
+            </div>
+
+            <!-- Стресс -->
+            <div class="substance-card">
+                <div class="substance-icon">💢</div>
+                <h3>Стресс</h3>
+                <div class="counter">
+                    <button class="counter-btn" onclick="changeValue('stress', -1)">-</button>
+                    <span class="counter-value" id="stress-value">3</span>
+                    <button class="counter-btn" onclick="changeValue('stress', 1)">+</button>
+                </div>
+                <small>1-10 уровень<br>Всегда плохо</small>
+            </div>
+        </div>
+
+        <div class="wheel-container">
+            <div class="pointer"></div>
+            <div class="wheel" id="wheel"></div>
+        </div>
+
+        <div class="controls">
+            <button class="spin-btn" onclick="spinWheel()" id="spin-btn">Крутить Волчок Судьбы!</button>
+        </div>
+
+        <div class="result" id="result" style="display: none;">
+            <h3>Вероятность критического урона:</h3>
+            <div class="probability" id="probability">0%</div>
+            <div class="risk-level" id="risk-level">Низкий риск</div>
+            
+            <div class="modifiers" id="modifiers">
+                <!-- Модификаторы будут здесь -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const substances = {
+            coffee: { value: 0, min: 0, max: 10 },
+            wine: { value: 0, min: 0, max: 8 },
+            beer: { value: 0, min: 0, max: 10 },
+            sleep: { value: 8, min: 0, max: 16 },
+            stress: { value: 3, min: 1, max: 10 }
+        };
+
+        function changeValue(substance, delta) {
+            const sub = substances[substance];
+            const newValue = sub.value + delta;
+            
+            if (newValue >= sub.min && newValue <= sub.max) {
+                sub.value = newValue;
+                document.getElementById(`${substance}-value`).textContent = newValue;
+            }
+        }
+
+        function calculateModifiers() {
+            let baseProbability = 50; // Базовая вероятность
+            const modifiers = [];
+
+            // Кофе: 1-4 чашки снижают риск, с 5-й повышают
+            if (substances.coffee.value >= 1 && substances.coffee.value <= 4) {
+                const reduction = substances.coffee.value * 3;
+                baseProbability -= reduction;
+                modifiers.push({
+                    text: `☕ Кофе (${substances.coffee.value} чашек): -${reduction}%`,
+                    class: 'positive'
+                });
+            } else if (substances.coffee.value >= 5) {
+                const increase = (substances.coffee.value - 4) * 5;
+                baseProbability += increase;
+                modifiers.push({
+                    text: `☕ Перебор кофе (${substances.coffee.value} чашек): +${increase}%`,
+                    class: 'negative'
+                });
+            }
+
+            // Вино: со 2-го бокала повышает вероятность
+            if (substances.wine.value >= 2) {
+                const wineBonus = (substances.wine.value - 1) * 4;
+                baseProbability += wineBonus;
+                modifiers.push({
+                    text: `🍷 Вино (${substances.wine.value} бокалов): +${wineBonus}%`,
+                    class: substances.wine.value <= 3 ? 'warning' : 'negative'
+                });
+            }
+
+            // Пиво: с 3-й кружки повышает вероятность
+            if (substances.beer.value >= 3) {
+                const beerBonus = (substances.beer.value - 2) * 3;
+                baseProbability += beerBonus;
+                modifiers.push({
+                    text: `🍺 Пиво (${substances.beer.value} кружек): +${beerBonus}%`,
+                    class: substances.beer.value <= 5 ? 'warning' : 'negative'
+                });
+            }
+
+            // Сон: меньше 6 часов - риск, больше 12 - пересып
+            if (substances.sleep.value < 6) {
+                const sleepPenalty = (6 - substances.sleep.value) * 8;
+                baseProbability += sleepPenalty;
+                modifiers.push({
+                    text: `💤 Недосып (${substances.sleep.value} часов): +${sleepPenalty}%`,
+                    class: 'negative'
+                });
+            } else if (substances.sleep.value > 12) {
+                const oversleepPenalty = (substances.sleep.value - 12) * 4;
+                baseProbability += oversleepPenalty;
+                modifiers.push({
+                    text: `💤 Пересып (${substances.sleep.value} часов): +${oversleepPenalty}%`,
+                    class: 'warning'
+                });
+            } else {
+                const sleepBonus = (substances.sleep.value - 6) * 2;
+                baseProbability -= sleepBonus;
+                modifiers.push({
+                    text: `💤 Здоровый сон (${substances.sleep.value} часов): -${sleepBonus}%`,
+                    class: 'positive'
+                });
+            }
+
+            // Стресс: всегда повышает вероятность
+            const stressPenalty = (substances.stress.value - 1) * 6;
+            baseProbability += stressPenalty;
+            modifiers.push({
+                text: `💢 Стресс (уровень ${substances.stress.value}): +${stressPenalty}%`,
+                class: 'negative'
+            });
+
+            // Перекрестные эффекты
+            if (substances.coffee.value >= 3 && substances.wine.value >= 2) {
+                baseProbability += 15;
+                modifiers.push({
+                    text: `⚡ Кофе + Вино: нервозность +15%`,
+                    class: 'negative'
+                });
+            }
+
+            if (substances.beer.value >= 4 && substances.wine.value >= 2) {
+                baseProbability += 20;
+                modifiers.push({
+                    text: `💫 Пиво + Вино: головокружение +20%`,
+                    class: 'negative'
+                });
+            }
+
+            if (substances.sleep.value >= 7 && substances.stress.value <= 2) {
+                baseProbability -= 10;
+                modifiers.push({
+                    text: `✨ Отдых + спокойствие: -10%`,
+                    class: 'positive'
+                });
+            }
+
+            // Ограничение вероятности от 1% до 95%
+            baseProbability = Math.max(1, Math.min(95, baseProbability));
+
+            return { probability: Math.round(baseProbability), modifiers };
+        }
+
+        function spinWheel() {
+            const spinBtn = document.getElementById('spin-btn');
+            const wheel = document.getElementById('wheel');
+            const resultDiv = document.getElementById('result');
+            
+            // Блокируем кнопку на время анимации
+            spinBtn.disabled = true;
+            spinBtn.textContent = 'Волчок крутится...';
+            
+            // Запускаем анимацию
+            wheel.classList.add('spinning');
+            
+            // Рассчитываем результат
+            const { probability, modifiers } = calculateModifiers();
+            
+            // Добавляем случайность волчка (±15%)
+            const wheelBonus = Math.random() * 30 - 15;
+            const finalProbability = Math.max(1, Math.min(95, probability + wheelBonus));
+            
+            // Показываем результат после анимации
+            setTimeout(() => {
+                wheel.classList.remove('spinning');
+                
+                document.getElementById('probability').textContent = `${Math.round(finalProbability)}%`;
+                
+                // Определяем уровень риска
+                let riskLevel, riskClass;
+                if (finalProbability < 25) {
+                    riskLevel = "Низкий риск";
+                    riskClass = "positive";
+                } else if (finalProbability < 50) {
+                    riskLevel = "Умеренный риск";
+                    riskClass = "warning";
+                } else if (finalProbability < 75) {
+                    riskLevel = "Высокий риск";
+                    riskClass = "negative";
+                } else {
+                    riskLevel = "КРИТИЧЕСКИЙ РИСК!";
+                    riskClass = "negative";
+                }
+                
+                document.getElementById('risk-level').textContent = riskLevel;
+                document.getElementById('risk-level').className = `risk-level ${riskClass}`;
+                
+                // Показываем модификаторы
+                const modifiersDiv = document.getElementById('modifiers');
+                modifiersDiv.innerHTML = modifiers.map(mod => 
+                    `<div class="modifier-item ${mod.class}">${mod.text}</div>`
+                ).join('');
+                
+                resultDiv.style.display = 'block';
+                spinBtn.disabled = false;
+                spinBtn.textContent = 'Крутить Волчок Судьбы!';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
